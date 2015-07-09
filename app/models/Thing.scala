@@ -55,7 +55,7 @@ object Thing {
   lazy val indexName = "things"
   lazy val typeName = "thing"
 
-  val node = nodeBuilder.client(true).clusterName("elasticsearch").node
+  val node = nodeBuilder.client(true).node
   val client = node.client
 
   def search(q: String): Seq[Thing] = {
