@@ -27,16 +27,18 @@ class Things extends Controller {
 
     Thing.findById(id).map { thing =>
       Ok(Json.obj(
-        "data" -> Json.obj(
-          "thing" -> thing.rate(1)
-        )
+        "data" -> thing.rate(1)
       ))
     }.getOrElse(NotFound)
   }
 
   def create = Action {
-    Thing.create
-    Ok(views.html.index("Your new application is ready."))
+
+
+//    Thing.create( ).map { thing =>
+//      Created(Json.obj("data" -> Json.obj("thing" -> thing)))
+//    }.getOrElse(BadRequest)
+    Ok
   }
 
   def update(id: Long) = Action {
