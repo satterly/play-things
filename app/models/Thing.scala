@@ -1,22 +1,32 @@
 package models
 
-import java.sql.Timestamp
-
 import org.joda.time.{DateTimeZone, DateTime}
 import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json.{Json, JsString, JsValue, Writes}
 
+
+case class Location (
+  latitude: Double,
+  longitude: Double,
+  altitude: Double)
+
+object Location {
+  implicit val locationWrites = Json.writes[Location]
+}
+
 case class Thing (
   id: Option[Long] = None,
-  title: String,
-  description: String,
+  note: String,
+  link: String,
   `type`: String,
   userId: Int,
   status: String,
-  rating: Int,
+  isPublic: Boolean,
+  rating: Double,
+  votes: Int,
   tags: Seq[String],
-  geocode: Map[String, String],
-  thumbnail: String,
+  location: Location,
+  image: String,
   createdAt: DateTime = new DateTime(),
   lastModified: DateTime = new DateTime())
 
@@ -29,6 +39,13 @@ object Thing {
   }
 
   implicit val thingWrites = Json.writes[Thing]
+
+  def rate(rating: Int, thing: Thing): Thing = {
+    thing.copy(
+      rating = Math.ceil((thing.rating * 10 * thing.votes + rating * 10) / (thing.votes + 1)) / 10,
+      votes = thing.votes + 1
+    )
+  }
 
   def search(q: String): Seq[Thing] = {
 
@@ -43,7 +60,19 @@ object Thing {
 
   def findById(id: Long): Option[Thing] = {
 
-    Some(Thing(Some(1L), "title", "desc", "bike", 5, "visible", 4, Seq("foo", "bar", "baz"), Map("lat" -> "44", "lng" -> "3345"), "http://"))
+    Some(Thing(
+      id = Some(1L),
+      note = "title",
+      link = "http://",
+      `type` = "bike",
+      userId = 5,
+      status = "visible",
+      isPublic = false,
+      rating = 4,
+      votes = 1,
+      tags = Seq("foo", "bar", "baz"),
+      location = Location(444.5, 3456.0, 100),
+      image = "http://"))
   }
 
   def findByTag(tag: String): Seq[Thing] = {

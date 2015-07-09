@@ -24,10 +24,11 @@ class Things extends Controller {
   }
 
   def show(id: Long) = Action {
+
     Thing.findById(id).map { thing =>
       Ok(Json.obj(
         "data" -> Json.obj(
-          "thing" -> thing
+          "thing" -> Thing.rate(1, Thing.rate(5, thing))
         )
       ))
     }.getOrElse(NotFound)
