@@ -10,6 +10,7 @@ libraryDependencies ++= Seq(
   jdbc,
   cache,
   ws,
+  "org.elasticsearch" % "elasticsearch" % "1.6.0",
   specs2 % Test
 )
 

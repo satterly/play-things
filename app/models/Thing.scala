@@ -1,5 +1,9 @@
 package models
 
+import java.util.UUID
+
+import org.elasticsearch.node.NodeBuilder._
+import org.elasticsearch.common.settings.ImmutableSettings._
 import org.joda.time.{DateTimeZone, DateTime}
 import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json.{Json, JsString, JsValue, Writes}
@@ -15,7 +19,7 @@ object Location {
 }
 
 case class Thing (
-  id: Option[Long] = None,
+  id: Option[String] = Some(UUID.randomUUID.toString),
   note: String,
   link: String,
   `type`: String,
@@ -48,6 +52,12 @@ object Thing {
 
   implicit val thingWrites = Json.writes[Thing]
 
+  lazy val indexName = "things"
+  lazy val typeName = "thing"
+
+  val node = nodeBuilder.client(true).clusterName("elasticsearch").node
+  val client = node.client
+
   def search(q: String): Seq[Thing] = {
 
     println(s"Searching all things for $q")
@@ -62,7 +72,6 @@ object Thing {
   def findById(id: Long): Option[Thing] = {
 
     Some(Thing(
-      id = Some(1L),
       note = "title",
       link = "http://",
       `type` = "bike",
@@ -81,7 +90,24 @@ object Thing {
     Seq()
   }
 
-  def create(name: String, note: String, status: String): Option[Thing] = ???
+  def create: Option[Thing] = {
+
+    val thing = Thing(
+      note = "title",
+      link = "http://",
+      `type` = "bike",
+      userId = 5,
+      status = "visible",
+      isPublic = false,
+      rating = 4,
+      votes = 1,
+      tags = Seq("foo", "bar", "baz"),
+      location = Location(444.5, 3456.0, 100),
+      image = "http://")
+
+    client.prepareIndex(indexName, typeName, thing.id.get).setSource(Json.toJson(thing).toString).execute().actionGet()
+    Some(thing)
+  }
 
   def update(id: Long, thing: Thing): Boolean = ???
 

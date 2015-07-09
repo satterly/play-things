@@ -35,6 +35,7 @@ class Things extends Controller {
   }
 
   def create = Action {
+    Thing.create
     Ok(views.html.index("Your new application is ready."))
   }
 
