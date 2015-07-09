@@ -1,25 +1,36 @@
 package controllers
 
-import play.api._
+import models.Thing
+import play.api.Play
+import play.api.libs.json._
+import play.api.libs.ws._
 import play.api.mvc._
 
 class Things extends Controller {
 
-  def find(q: Option[String]) = Action {
+  def find = Action { implicit request =>
 
-    q match {
-      case Some(query) => println(s"search for $query")
-      case _ => println("list all")
+    val query = request.getQueryString("q").getOrElse("")
+    val tag = request.getQueryString("tag").getOrElse("")
+
+    val things = if (!query.isEmpty) {
+      Thing.search(query).toList
+    } else if (!tag.isEmpty) {
+      Thing.findByTag(tag).toList
+    } else {
+      Thing.all
     }
-
-    Ok(views.html.index("Your new application is ready."))
+    Ok(Json.obj("data" -> things))
   }
 
   def show(id: Long) = Action {
-//    Things.findById(id).map { client =>
-//      Ok(views.html.Things.display(client))
-//    }.getOrElse(NotFound)
-    Ok(views.html.index("Your new application is ready."))
+    Thing.findById(id).map { thing =>
+      Ok(Json.obj(
+        "data" -> Json.obj(
+          "thing" -> thing
+        )
+      ))
+    }.getOrElse(NotFound)
   }
 
   def create = Action {
@@ -33,9 +44,4 @@ class Things extends Controller {
   def delete(id: Long) = Action {
     Ok(views.html.index("Your new application is ready."))
   }
-
-//  def search = Action {
-//    Ok(views.html.index("Your new application is ready."))
-//  }
-
 }
