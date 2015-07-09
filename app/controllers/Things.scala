@@ -20,13 +20,18 @@ class Things extends Controller {
     } else {
       Thing.all
     }
-    Ok(Json.obj("data" -> things))
+    Ok(Json.obj(
+      "uri" -> s"http://localhost:9000/things?${request.rawQueryString}",
+      "data" -> things,
+      "total" -> things.length
+    ))
   }
 
   def show(id: Long) = Action {
 
     Thing.findById(id).map { thing =>
       Ok(Json.obj(
+        "uri" -> s"http://localhost:9000/things/$id",
         "data" -> thing.rate(1)
       ))
     }.getOrElse(NotFound)
