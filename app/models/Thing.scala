@@ -28,7 +28,15 @@ case class Thing (
   location: Location,
   image: String,
   createdAt: DateTime = new DateTime(),
-  lastModified: DateTime = new DateTime())
+  lastModified: DateTime = new DateTime()) {
+
+  def rate(rating: Int): Thing = {
+    this.copy(
+      rating = Math.ceil((this.rating * 10 * this.votes + rating * 10) / (this.votes + 1)) / 10,
+      votes = this.votes + 1
+    )
+  }
+}
 
 object Thing {
 
@@ -39,13 +47,6 @@ object Thing {
   }
 
   implicit val thingWrites = Json.writes[Thing]
-
-  def rate(rating: Int, thing: Thing): Thing = {
-    thing.copy(
-      rating = Math.ceil((thing.rating * 10 * thing.votes + rating * 10) / (thing.votes + 1)) / 10,
-      votes = thing.votes + 1
-    )
-  }
 
   def search(q: String): Seq[Thing] = {
 

@@ -28,7 +28,7 @@ class Things extends Controller {
     Thing.findById(id).map { thing =>
       Ok(Json.obj(
         "data" -> Json.obj(
-          "thing" -> Thing.rate(1, Thing.rate(5, thing))
+          "thing" -> thing.rate(1)
         )
       ))
     }.getOrElse(NotFound)
