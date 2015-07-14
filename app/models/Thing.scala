@@ -57,8 +57,8 @@ object Thing {
       isPublic = (json \ "isPublic").as[Boolean],
       rating = (json \ "rating").as[Double],
       votes = 1,
-      tags = Seq("tag1", "tag2"),
-      location = Some(Location(4,4,4)),
+      tags = (json \ "tags").as[Seq[String]],
+      location = (json \ "location").asOpt[Location],
       image = (json \ "image").asOpt[String],
       createdAt = Some(new DateTime()),
       lastModified = Some(new DateTime())
