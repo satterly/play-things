@@ -39,12 +39,15 @@ class Things extends Controller {
 
   def create = Action(parse.json) { request =>
 
+    println(request.body.toString())
+
     request.body.validate[Thing].map { thing =>
       Thing.save(thing).map { result =>
       Created(Json.obj("data" -> result))
-      }.getOrElse(BadRequest)
+      }.getOrElse(InternalServerError)
+    }.recoverTotal { e =>
+      BadRequest(JsError.toJson(e))
     }
-    Ok
 
 //    val thing = request.body.as[Thing]
 //    Thing.save(thing).map { thing =>

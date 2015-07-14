@@ -2,6 +2,7 @@ package models
 
 import java.util.UUID
 
+import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.node.NodeBuilder._
 import org.elasticsearch.common.settings.ImmutableSettings._
 import org.joda.time.{DateTimeZone, DateTime}
@@ -32,8 +33,8 @@ case class Thing (
   tags: Seq[String] = Seq(),
   location: Option[Location],
   image: Option[String] = None,
-  createdAt: DateTime = new DateTime(),
-  lastModified: DateTime = new DateTime()
+  createdAt: Option[DateTime] = Some(new DateTime()),
+  lastModified: Option[DateTime] = Some(new DateTime())
   ) {
 
   def rate(rating: Int): Thing = {
@@ -60,9 +61,15 @@ object Thing {
   val client = node.client
 
   def search(q: String): Seq[Thing] = {
-
     println(s"Searching all things for $q")
-    Seq()
+    val response = client.prepareSearch(indexName)
+      .setTypes(typeName)
+      .setQuery(QueryBuilders.queryStringQuery(q))
+      .execute()
+      .actionGet()
+
+    val thing = response.getHits.asScala.map { hit => Json.parse(hit.getSourceAsString).as[Thing] }
+    thing.toList
   }
 
   def findAll: List[Thing] = {
@@ -83,16 +90,24 @@ object Thing {
 
   def findByTag(tag: String): Seq[Thing] = {
     println(s"Filtering by tag $tag")
-    Seq()
+    val response = client.prepareSearch(indexName)
+      .setTypes(typeName)
+      .setQuery(QueryBuilders.termQuery("tags", tag))
+      .execute()
+      .actionGet()
+
+    val thing = response.getHits.asScala.map { hit => Json.parse(hit.getSourceAsString).as[Thing] }
+    thing.toList
   }
 
   def save(thing: Thing): Option[Thing] = {
     println(thing.toString)
-    client.prepareIndex(indexName, typeName, thing.id.get)
-      .setSource(Json.toJson(thing).toString)
+    val thingWithDefaults = thing.copy(id=Some(UUID.randomUUID.toString), createdAt = Some(new DateTime()), lastModified = Some(new DateTime()))
+    client.prepareIndex(indexName, typeName)
+      .setSource(Json.toJson(thingWithDefaults).toString)
       .execute()
       .actionGet()
-    Some(thing)
+    Some(thingWithDefaults)
   }
 
   def update(id: Long, thing: Thing): Boolean = ???
