@@ -31,9 +31,9 @@ case class Thing (
   votes: Int = 0,
   tags: Seq[String] = Seq(),
   location: Option[Location],
-  image: Option[String] = None
-  //createdAt: Option[DateTime] = Some(new DateTime()),
-  //lastModified: DateTime = new DateTime()
+  image: Option[String] = None,
+  createdAt: DateTime = new DateTime(),
+  lastModified: DateTime = new DateTime()
   ) {
 
   def rate(rating: Int): Thing = {
@@ -46,12 +46,10 @@ case class Thing (
 
 object Thing {
 
-  implicit val dateTimeWrites = new Writes[DateTime] {
-    def writes(t: DateTime): JsValue = JsString(ISODateTimeFormat.dateTime.withZone(DateTimeZone.UTC).print(
-      new DateTime(t))
-    )
+  implicit object dateTimeWrites extends Writes[org.joda.time.DateTime] {
+    def writes(d: DateTime): JsValue = JsString(ISODateTimeFormat.dateTime.withZoneUTC.print(d))
   }
-
+  implicit val dateTimeReads = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZZ")
 
   implicit val thingFmt = Json.format[Thing]
 
