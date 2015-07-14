@@ -41,13 +41,9 @@ class Things extends Controller {
 
     println(request.body.toString())
 
-    request.body.validate[Thing].map { thing =>
-      Thing.save(thing).map { result =>
+      Thing.save(Thing.fromJson(request.body)).map { result =>
       Created(Json.obj("data" -> result))
       }.getOrElse(InternalServerError)
-    }.recoverTotal { e =>
-      BadRequest(JsError.toJson(e))
-    }
 
 //    val thing = request.body.as[Thing]
 //    Thing.save(thing).map { thing =>

@@ -20,7 +20,7 @@ object Location {
 }
 
 case class Thing (
-  id: Option[String] = Some(UUID.randomUUID.toString),
+  id: String = UUID.randomUUID.toString,
   note: String,
   link: String,
   `type`: String,
@@ -45,6 +45,25 @@ case class Thing (
 }
 
 object Thing {
+
+  def fromJson(json: JsValue): Thing = {
+    new Thing(
+      id = UUID.randomUUID.toString,
+      note = (json \ "note").as[String],
+      link = (json \ "link").as[String],
+      `type` = (json \ "type").as[String],
+      userId = (json \ "userId").as[Int],
+      status = (json \ "status").as[String],
+      isPublic = (json \ "isPublic").as[Boolean],
+      rating = (json \ "rating").as[Double],
+      votes = 1,
+      tags = Seq("tag1", "tag2"),
+      location = Some(Location(4,4,4)),
+      image = (json \ "image").asOpt[String],
+      createdAt = Some(new DateTime()),
+      lastModified = Some(new DateTime())
+    )
+  }
 
   implicit object dateTimeWrites extends Writes[org.joda.time.DateTime] {
     def writes(d: DateTime): JsValue = JsString(ISODateTimeFormat.dateTime.withZoneUTC.print(d))
@@ -101,12 +120,11 @@ object Thing {
 
   def save(thing: Thing): Option[Thing] = {
     println(thing.toString)
-    val thingWithDefaults = thing.copy(id=Some(UUID.randomUUID.toString), createdAt = Some(new DateTime()), lastModified = Some(new DateTime()))
     client.prepareIndex(indexName, typeName)
-      .setSource(Json.toJson(thingWithDefaults).toString)
+      .setSource(Json.toJson(thing).toString)
       .execute()
       .actionGet()
-    Some(thingWithDefaults)
+    Some(thing)
   }
 
   def update(id: Long, thing: Thing): Boolean = ???
