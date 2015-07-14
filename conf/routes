@@ -7,7 +7,7 @@ GET           /                    controllers.Application.index
 # Global search
 GET           /search              controllers.Application.search(q: String)
 
-GET           /things              controllers.Things.find
+GET           /things              controllers.Things.list
 GET           /things/:id          controllers.Things.show(id: Long)
 POST          /things              controllers.Things.create
 PUT           /things/:id          controllers.Things.update(id: Long)

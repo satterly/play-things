@@ -8,7 +8,7 @@ import play.api.mvc._
 
 class Things extends Controller {
 
-  def find = Action { implicit request =>
+  def list = Action { implicit request =>
 
     val query = request.getQueryString("q").getOrElse("")
     val tag = request.getQueryString("tag").getOrElse("")
@@ -18,7 +18,7 @@ class Things extends Controller {
     } else if (!tag.isEmpty) {
       Thing.findByTag(tag).toList
     } else {
-      Thing.all
+      Thing.findAll
     }
     Ok(Json.obj(
       "uri" -> s"http://localhost:9000/things?${request.rawQueryString}",
@@ -37,13 +37,23 @@ class Things extends Controller {
     }.getOrElse(NotFound)
   }
 
-  def create = Action {
+  def create = Action(parse.json) { request =>
 
-
-//    Thing.create( ).map { thing =>
-//      Created(Json.obj("data" -> Json.obj("thing" -> thing)))
-//    }.getOrElse(BadRequest)
+    request.body.validate[Thing].map { thing =>
+      Thing.save(thing).map { result =>
+      Created(Json.obj("data" -> result))
+      }.getOrElse(BadRequest)
+    }
     Ok
+
+//    val thing = request.body.as[Thing]
+//    Thing.save(thing).map { thing =>
+//      Created(Json.obj(
+//        "uri" -> s"http://localhost:9000/things/${thing.id}",
+//        "data" -> Json.obj("thing" -> thing)
+//      ))
+//    }.getOrElse(BadRequest)
+//    Ok
   }
 
   def update(id: Long) = Action {
