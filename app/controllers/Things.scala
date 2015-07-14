@@ -38,21 +38,14 @@ class Things extends Controller {
   }
 
   def create = Action(parse.json) { request =>
-
-    println(request.body.toString())
-
-      Thing.save(Thing.fromJson(request.body)).map { result =>
-      Created(Json.obj("data" -> result))
+    Thing.fromJson(request.body).map { thing =>
+      Thing.save(thing).map { result =>
+        Created(Json.obj(
+          "uri" -> s"http://localhost:9000/things/${thing.id}",
+          "data" -> thing
+        ))
       }.getOrElse(InternalServerError)
-
-//    val thing = request.body.as[Thing]
-//    Thing.save(thing).map { thing =>
-//      Created(Json.obj(
-//        "uri" -> s"http://localhost:9000/things/${thing.id}",
-//        "data" -> Json.obj("thing" -> thing)
-//      ))
-//    }.getOrElse(BadRequest)
-//    Ok
+    }.getOrElse(BadRequest)
   }
 
   def update(id: Long) = Action {

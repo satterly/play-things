@@ -9,6 +9,7 @@ import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
 
 import scala.collection.JavaConverters._
+import scala.util.Try
 
 case class Location (
   latitude: Double,
@@ -46,7 +47,8 @@ case class Thing (
 
 object Thing {
 
-  def fromJson(json: JsValue): Thing = Thing(
+  def fromJson(json: JsValue): Option[Thing] = Try(
+    Thing(
       id = UUID.randomUUID.toString,
       note = (json \ "note").as[String],
       link = (json \ "link").as[String],
@@ -62,6 +64,7 @@ object Thing {
       createdAt = Some(new DateTime()),
       lastModified = Some(new DateTime())
     )
+  ).toOption
 
   implicit object dateTimeWrites extends Writes[org.joda.time.DateTime] {
     def writes(d: DateTime): JsValue = JsString(ISODateTimeFormat.dateTime.withZoneUTC.print(d))
