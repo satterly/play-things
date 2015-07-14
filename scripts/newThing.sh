@@ -12,8 +12,8 @@ curl -v -X POST http://localhost:9000/things -H 'Content-type: application/json'
     "isPublic": true,
     "rating": 5,
     "votes": 1,
-    "tags": [ "graphite", "devops" ],
+    "tags": [ "graphite", "devops", "alerta" ],
     "location": { "latitude": 10, "longitude": 20, "altitude": 30 },
-    "image": "duggee.jpg"
+    "image": "duggee2.jpg"
 }' | jq .
 echo

@@ -46,8 +46,7 @@ case class Thing (
 
 object Thing {
 
-  def fromJson(json: JsValue): Thing = {
-    new Thing(
+  def fromJson(json: JsValue): Thing = Thing(
       id = UUID.randomUUID.toString,
       note = (json \ "note").as[String],
       link = (json \ "link").as[String],
@@ -63,7 +62,6 @@ object Thing {
       createdAt = Some(new DateTime()),
       lastModified = Some(new DateTime())
     )
-  }
 
   implicit object dateTimeWrites extends Writes[org.joda.time.DateTime] {
     def writes(d: DateTime): JsValue = JsString(ISODateTimeFormat.dateTime.withZoneUTC.print(d))
