@@ -4,11 +4,10 @@ import java.util.UUID
 
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.node.NodeBuilder._
-import org.elasticsearch.common.settings.ImmutableSettings._
-import org.joda.time.{DateTimeZone, DateTime}
+import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import play.api.http.MediaType.parse
 import play.api.libs.json._
+
 import scala.collection.JavaConverters._
 
 case class Location (
