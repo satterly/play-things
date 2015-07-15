@@ -48,8 +48,9 @@ class Things extends Controller {
     }.getOrElse(BadRequest)
   }
 
-  def update(id: String) = Action {
-    Ok(views.html.index("Your new application is ready."))
+  def update(id: String) = Action(parse.json) { request =>
+    Thing.update(id, request.body)
+    Ok
   }
 
   def remove(id: String) = Action {

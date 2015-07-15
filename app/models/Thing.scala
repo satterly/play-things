@@ -2,8 +2,7 @@ package models
 
 import java.util.UUID
 
-import org.elasticsearch.action.delete.DeleteRequest
-import org.elasticsearch.action.search.SearchType
+import org.elasticsearch.action.update.UpdateRequest
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.node.NodeBuilder._
 import org.joda.time.DateTime
@@ -128,7 +127,13 @@ object Thing {
     Some(thing)
   }
 
-  def update(id: String, thing: Thing): Boolean = ???
+  def update(id: String, source: JsValue): Boolean = {
+
+    client.prepareUpdate(indexName, typeName, id)
+      .setDoc(Json.stringify(source))
+      .execute()
+      .actionGet().isCreated
+  }
 
   def deleteById(id: String): Boolean = {
     client.prepareDelete(indexName, typeName, id)
