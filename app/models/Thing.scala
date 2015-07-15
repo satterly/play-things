@@ -141,18 +141,25 @@ object Thing {
     val response = client.prepareSearch(indexName)
       .setTypes(typeName)
       .setQuery(QueryBuilders.termQuery("tags", tag))
-      .setSearchType(SearchType.SCAN)
-      .setScroll("10m")
+//      .setSearchType(SearchType.SCAN)
+//      .setScroll("10m")
       .execute()
       .actionGet()
 
     println(response.getHits.totalHits())
     println(response.getHits.hits().toString)
 
+    response.getHits.asScala.map { hit => println(hit.field("status")) }
+
     val bulkRequest = client.prepareBulk()
     response.getHits.asScala.map { hit =>
       println(s"Adding to delete list")
-      bulkRequest.add(client.prepareDelete().setId(hit.getId))
+      bulkRequest.add(
+        client.prepareDelete()
+          .setIndex(indexName)
+          .setType(typeName)
+          .setId(hit.getId)
+      )
     }
     if (bulkRequest.numberOfActions() > 0) {
       println("Deleting...")
