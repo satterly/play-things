@@ -1,8 +1,16 @@
 Things to do
 ------------
 
-1. location
-2. /things?q= and things?tags= ?geocode= ?rating=(4,5)
-3. add elasticsearch for persistence
+1. search by location
+2. search by rating range ?rating=(4,5)
+3. fix option returns. currently getting NPE
 4. s3 bucket for images
-5.
+5. swagger for docs
+6. authentication
+7. pagination
+8. ?fields=...
+9. errors
+10. version /v1
+
+* angular web app
+* android java app
