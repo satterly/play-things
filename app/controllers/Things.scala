@@ -27,7 +27,7 @@ class Things extends Controller {
     ))
   }
 
-  def show(id: Long) = Action {
+  def show(id: String) = Action {
 
     Thing.findById(id).map { thing =>
       Ok(Json.obj(
@@ -48,11 +48,21 @@ class Things extends Controller {
     }.getOrElse(BadRequest)
   }
 
-  def update(id: Long) = Action {
+  def update(id: String) = Action {
     Ok(views.html.index("Your new application is ready."))
   }
 
-  def delete(id: Long) = Action {
-    Ok(views.html.index("Your new application is ready."))
+  def remove(id: String) = Action {
+    Thing.deleteById(id)
+    Ok
   }
+
+  def delete = Action { implicit request =>
+    val tag = request.getQueryString("tag").getOrElse("")
+    if (!tag.isEmpty) {
+      Thing.deleteByTag(tag)
+    }
+    Ok
+  }
+
 }

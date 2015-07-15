@@ -2,6 +2,8 @@ package models
 
 import java.util.UUID
 
+import org.elasticsearch.action.delete.DeleteRequest
+import org.elasticsearch.action.search.SearchType
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.node.NodeBuilder._
 import org.joda.time.DateTime
@@ -102,10 +104,7 @@ object Thing {
     thing.toList
   }
 
-  def findById(id: Long): Option[Thing] = {
-
-    None
-  }
+  def findById(id: String): Option[Thing] = ???
 
   def findByTag(tag: String): Seq[Thing] = {
     println(s"Filtering by tag $tag")
@@ -122,13 +121,45 @@ object Thing {
   def save(thing: Thing): Option[Thing] = {
     println(thing.toString)
     client.prepareIndex(indexName, typeName)
+      .setId(thing.id)
       .setSource(Json.toJson(thing).toString)
       .execute()
       .actionGet()
     Some(thing)
   }
 
-  def update(id: Long, thing: Thing): Boolean = ???
+  def update(id: String, thing: Thing): Boolean = ???
 
-  def delete(id: Long): Boolean = ???
+  def deleteById(id: String): Boolean = {
+    client.prepareDelete(indexName, typeName, id)
+      .execute()
+      .actionGet().isFound
+  }
+
+  def deleteByTag(tag: String): Boolean = {
+    println(s"Delete all things tagged with $tag")
+    val response = client.prepareSearch(indexName)
+      .setTypes(typeName)
+      .setQuery(QueryBuilders.termQuery("tags", tag))
+      .setSearchType(SearchType.SCAN)
+      .setScroll("10m")
+      .execute()
+      .actionGet()
+
+    println(response.getHits.totalHits())
+    println(response.getHits.hits().toString)
+
+    val bulkRequest = client.prepareBulk()
+    response.getHits.asScala.map { hit =>
+      println(s"Adding to delete list")
+      bulkRequest.add(client.prepareDelete().setId(hit.getId))
+    }
+    if (bulkRequest.numberOfActions() > 0) {
+      println("Deleting...")
+      val result = bulkRequest.execute().actionGet()
+      !result.hasFailures
+    } else {
+      false
+    }
+  }
 }
