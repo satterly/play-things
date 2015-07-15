@@ -103,7 +103,13 @@ object Thing {
     thing.toList
   }
 
-  def findById(id: String): Option[Thing] = ???
+  def findById(id: String): Option[Thing] = {
+    val response = client.prepareGet(indexName, typeName, id)
+      .execute()
+      .actionGet()
+    val thing = Json.parse(response.getSourceAsString).as[Thing]
+    Some(thing)
+  }
 
   def findByTag(tag: String): Seq[Thing] = {
     println(s"Filtering by tag $tag")
